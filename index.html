@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Request Outing — Mobile Replica</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;600&display=swap">
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Roboto', system-ui, -apple-system, 'Segoe UI', Arial;
+      background:#f8fafb;
+      color:#263238;
+    }
+    .container{max-width:480px;margin:0 auto;padding:12px}
+
+    header{background:#08436b;color:#fff;padding:12px;border-radius:6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    header .brand{display:flex;align-items:center;gap:8px}
+    .logo img{width:40px;height:auto;display:block}
+    header h1{font-size:16px;font-family:'Open Sans',sans-serif;font-weight:600}
+    .logout{border:1px solid rgba(255,255,255,0.3);padding:4px 10px;border-radius:6px;color:#fff;background:transparent;font-size:13px;font-family:'Open Sans',sans-serif}
+
+    .card{background:#fff;border-radius:10px;padding:14px;margin-top:14px;box-shadow:0 4px 14px rgba(20,20,20,0.05)}
+    label{display:block;margin-bottom:6px;color:#114060;font-weight:600;font-size:14px;font-family:'Open Sans',sans-serif}
+    input, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #eee;background:#fbfbfb;font-size:14px;font-family:'Roboto',sans-serif}
+    textarea{min-height:60px;resize:vertical}
+
+    .btn{width:100%;padding:12px;border-radius:8px;border:0;background:#d9d6f8;color:#08203a;font-weight:700;cursor:pointer;font-size:15px;margin-top:10px;font-family:'Open Sans',sans-serif}
+
+    .result-list{margin-top:18px;display:flex;flex-direction:column;gap:14px}
+    .result-card{border-radius:10px;padding:14px;border:2px solid #f5c747;background:#fff}
+    .result-card h3{margin-bottom:8px;font-size:15px;font-family:'Open Sans',sans-serif}
+    .muted{color:#334155;font-size:13px;font-family:'Roboto',sans-serif}
+
+    .otp-card{border-radius:10px;padding:14px;
+      border:2px solid #dfe9b6;
+      background:rgba(144,238,144,0.15);
+      text-align:right}
+    .otp-card h3{font-family:'Open Sans',sans-serif}
+    .otp-number{font-size:22px;color:#2b6b2b;font-weight:800;margin:6px 0;font-family:'Roboto',sans-serif}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">
+          <img src="https://upload.wikimedia.org/wikipedia/en/1/1e/SRM_Institute_of_Science_and_Technology_Logo.png" alt="SRM Logo">
+        </div>
+        <h1>REQUEST OUTING</h1>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px;margin-bottom:4px;color:#e6f3ff" id="user-email">su0456@srmist.edu.in</div>
+        <button class="logout" onclick="alert('Logout clicked')">Logout</button>
+      </div>
+    </header>
+
+    <!-- FORM (stays visible, becomes readonly after submit) -->
+    <section class="card" id="form-section">
+      <h2 style="font-size:18px;margin-bottom:8px;font-family:'Open Sans',sans-serif">Request Outing</h2>
+
+      <label>Full Name:</label>
+      <input type="text" id="name" placeholder="Enter your name">
+
+      <label style="margin-top:10px">Email (SRM):</label>
+      <input type="email" id="email" value="su0456@srmist.edu.in">
+
+      <label style="margin-top:10px">Room Number:</label>
+      <input type="text" id="room" placeholder="Enter room number">
+
+      <label style="margin-top:10px">Hostel Name:</label>
+      <input type="text" id="hostel" value="esq-a" readonly>
+
+      <label style="margin-top:10px">Out Date:</label>
+      <input type="date" id="outDate">
+
+      <label style="margin-top:10px">Out Time:</label>
+      <input type="time" id="outTime">
+
+      <label style="margin-top:10px">In Date:</label>
+      <input type="date" id="inDate">
+
+      <label style="margin-top:10px">In Time:</label>
+      <input type="time" id="inTime">
+
+      <label style="margin-top:10px">Reason for Outing:</label>
+      <textarea id="reason" placeholder="Enter reason for outing"></textarea>
+
+      <label style="margin-top:10px">Parent Email:</label>
+      <input type="email" id="parentEmail" placeholder="Enter parent email">
+
+      <!-- ✅ Added Parent Phone -->
+      <label style="margin-top:10px">Parent Phone:</label>
+      <input type="tel" id="parentPhone" placeholder="Enter parent phone number">
+
+      <button class="btn" id="sendBtn" onclick="handleSubmit()">Send Request</button>
+    </section>
+
+    <!-- RESULTS (below form) -->
+    <section class="result-list" id="result-section" style="display:none">
+      <div class="result-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3 style="margin:0">Current Request</h3>
+          <div style="background:#f7d86b;padding:4px 8px;border-radius:6px;font-weight:700;font-size:12px">STILL_OUT</div>
+        </div>
+        <div style="margin-top:8px;font-size:14px;line-height:1.6">
+          <!-- ✅ Added full details -->
+          <div><strong>Out Date:</strong> <span id="rOutDate"></span></div>
+          <div><strong>Out Time:</strong> <span id="rOutTime"></span></div>
+          <div><strong>In Date:</strong> <span id="rInDate"></span></div>
+          <div><strong>In Time:</strong> <span id="rInTime"></span></div>
+          <div><strong>Reason:</strong> <span id="rReason"></span></div>
+          <div><strong>Status:</strong> <span id="rStatus">still_out</span></div>
+        </div>
+      </div>
+
+      <div class="otp-card">
+        <h3 style="margin:0;font-size:15px">OTP for Arch Gate</h3>
+        <hr style="border:none;height:2px;background:#0a3b53;margin:10px 0;width:60%;margin-left:auto">
+        <div class="muted">Out Date: <span id="oOutDate"></span> | In Date: <span id="oInDate"></span></div>
+        <div class="otp-number" id="otpValue">000000</div>
+        <div class="muted" style="font-size:12px;margin-top:6px">Please present this OTP at the Arch Gate when returning to SRM.</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function generateOTP(){return Math.floor(100000 + Math.random()*900000).toString();}
+
+    function handleSubmit(){
+      const name=document.getElementById('name').value.trim();
+      const email=document.getElementById('email').value.trim();
+      const room=document.getElementById('room').value.trim();
+      const outDate=document.getElementById('outDate').value;
+      const outTime=document.getElementById('outTime').value;
+      const inDate=document.getElementById('inDate').value;
+      const inTime=document.getElementById('inTime').value;
+      const reason=document.getElementById('reason').value.trim();
+      const parentEmail=document.getElementById('parentEmail').value.trim();
+      const parentPhone=document.getElementById('parentPhone').value.trim();
+
+      if(!name||!email||!room||!outDate||!outTime||!inDate||!inTime||!reason||!parentEmail||!parentPhone){
+        alert('Please fill all fields before sending request.');return;}
+
+      const otp=generateOTP();
+      const payload={name,email,room,outDate,outTime,inDate,inTime,reason,parentEmail,parentPhone,otp};
+      sessionStorage.setItem('outingPayload',JSON.stringify(payload));
+
+      // Make fields readonly
+      document.querySelectorAll('#form-section input, #form-section textarea').forEach(el=>{
+        el.setAttribute('readonly','true');
+      });
+      document.getElementById('sendBtn').style.display='none';
+
+      // Show results
+      document.getElementById('result-section').style.display='flex';
+      document.getElementById('rOutDate').textContent=outDate;
+      document.getElementById('rOutTime').textContent=outTime;
+      document.getElementById('rInDate').textContent=inDate;
+      document.getElementById('rInTime').textContent=inTime;
+      document.getElementById('rReason').textContent=reason;
+      document.getElementById('oOutDate').textContent=outDate;
+      document.getElementById('oInDate').textContent=inDate;
+      document.getElementById('otpValue').textContent=otp;
+    }
+
+    window.addEventListener('load',()=>{
+      const raw=sessionStorage.getItem('outingPayload');
+      if(raw){
+        const p=JSON.parse(raw);
+        document.getElementById('name').value=p.name;
+        document.getElementById('email').value=p.email;
+        document.getElementById('room').value=p.room;
+        document.getElementById('outDate').value=p.outDate;
+        document.getElementById('outTime').value=p.outTime;
+        document.getElementById('inDate').value=p.inDate;
+        document.getElementById('inTime').value=p.inTime;
+        document.getElementById('reason').value=p.reason;
+        document.getElementById('parentEmail').value=p.parentEmail;
+        document.getElementById('parentPhone').value=p.parentPhone;
+
+        // Make fields readonly
+        document.querySelectorAll('#form-section input, #form-section textarea').forEach(el=>{
+          el.setAttribute('readonly','true');
+        });
+        document.getElementById('sendBtn').style.display='none';
+
+        // Show results
+        document.getElementById('result-section').style.display='flex';
+        document.getElementById('rOutDate').textContent=p.outDate;
+        document.getElementById('rOutTime').textContent=p.outTime;
+        document.getElementById('rInDate').textContent=p.inDate;
+        document.getElementById('rInTime').textContent=p.inTime;
+        document.getElementById('rReason').textContent=p.reason;
+        document.getElementById('oOutDate').textContent=p.outDate;
+        document.getElementById('oInDate').textContent=p.inDate;
+        document.getElementById('otpValue').textContent=p.otp;
+        document.getElementById('user-email').textContent=p.email||'su0456@srmist.edu.in';
+      }
+    });
+  </script>
+</body>
+</html>
