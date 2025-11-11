@@ -22,12 +22,13 @@
     header .brand{display:flex;align-items:center;gap:8px}
     .logo img{width:40px;height:auto;display:block}
     header h1{font-size:16px;font-family:'Open Sans',sans-serif;font-weight:600}
-    .logout{border:1px solid rgba(255,255,255,0.3);padding:4px 10px;border-radius:6px;color:#fff;background:transparent;font-size:13px;font-family:'Open Sans',sans-serif}
+    .logout{border:1px solid rgba(255,255,255,0.3);padding:4px 10px;border-radius:6px;color:#fff;background:transparent;font-size:13px;font-family:'Open Sans',sans-serif;cursor:pointer}
 
     .card{background:#fff;border-radius:10px;padding:14px;margin-top:14px;box-shadow:0 4px 14px rgba(20,20,20,0.05)}
     label{display:block;margin-bottom:6px;color:#114060;font-weight:600;font-size:14px;font-family:'Open Sans',sans-serif}
     input, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #eee;background:#fbfbfb;font-size:14px;font-family:'Roboto',sans-serif}
     textarea{min-height:60px;resize:vertical}
+    input[readonly], textarea[readonly]{background:#f4f4f4;color:#555;}
 
     .btn{width:100%;padding:12px;border-radius:8px;border:0;background:#d9d6f8;color:#08203a;font-weight:700;cursor:pointer;font-size:15px;margin-top:10px;font-family:'Open Sans',sans-serif}
 
@@ -59,7 +60,7 @@
       </div>
     </header>
 
-    <!-- FORM (stays visible, becomes readonly after submit) -->
+    <!-- FORM SECTION -->
     <section class="card" id="form-section">
       <h2 style="font-size:18px;margin-bottom:8px;font-family:'Open Sans',sans-serif">Request Outing</h2>
 
@@ -93,14 +94,13 @@
       <label style="margin-top:10px">Parent Email:</label>
       <input type="email" id="parentEmail" placeholder="Enter parent email">
 
-      <!-- ✅ Added Parent Phone -->
       <label style="margin-top:10px">Parent Phone:</label>
       <input type="tel" id="parentPhone" placeholder="Enter parent phone number">
 
       <button class="btn" id="sendBtn" onclick="handleSubmit()">Send Request</button>
     </section>
 
-    <!-- RESULTS (below form) -->
+    <!-- RESULT SECTION -->
     <section class="result-list" id="result-section" style="display:none">
       <div class="result-card">
         <div style="display:flex;justify-content:space-between;align-items:center">
@@ -108,13 +108,18 @@
           <div style="background:#f7d86b;padding:4px 8px;border-radius:6px;font-weight:700;font-size:12px">STILL_OUT</div>
         </div>
         <div style="margin-top:8px;font-size:14px;line-height:1.6">
-          <!-- ✅ Added full details -->
           <div><strong>Out Date:</strong> <span id="rOutDate"></span></div>
           <div><strong>Out Time:</strong> <span id="rOutTime"></span></div>
           <div><strong>In Date:</strong> <span id="rInDate"></span></div>
           <div><strong>In Time:</strong> <span id="rInTime"></span></div>
           <div><strong>Reason:</strong> <span id="rReason"></span></div>
           <div><strong>Status:</strong> <span id="rStatus">still_out</span></div>
+
+          <!-- ✅ Added handled info -->
+          <div style="margin-top:10px;padding:8px;background:#f9f9f9;border-radius:6px;border:1px solid #ddd">
+            <div><strong>Handled on:</strong> <span id="rHandledOn"></span></div>
+            <div><strong>Handled by:</strong> <span id="rHandledBy"></span></div>
+          </div>
         </div>
       </div>
 
@@ -129,7 +134,9 @@
   </div>
 
   <script>
-    function generateOTP(){return Math.floor(100000 + Math.random()*900000).toString();}
+    function generateOTP(){
+      return Math.floor(100000 + Math.random()*900000).toString();
+    }
 
     function handleSubmit(){
       const name=document.getElementById('name').value.trim();
@@ -144,11 +151,19 @@
       const parentPhone=document.getElementById('parentPhone').value.trim();
 
       if(!name||!email||!room||!outDate||!outTime||!inDate||!inTime||!reason||!parentEmail||!parentPhone){
-        alert('Please fill all fields before sending request.');return;}
+        alert('Please fill all fields before sending request.');
+        return;
+      }
 
       const otp=generateOTP();
-      const payload={name,email,room,outDate,outTime,inDate,inTime,reason,parentEmail,parentPhone,otp};
+      const handledOn=new Date().toLocaleString();
+      const handledBy="Nathiya";
+
+      const payload={name,email,room,outDate,outTime,inDate,inTime,reason,parentEmail,parentPhone,otp,handledOn,handledBy};
       sessionStorage.setItem('outingPayload',JSON.stringify(payload));
+
+      // Update top email dynamically
+      document.getElementById('user-email').textContent=email;
 
       // Make fields readonly
       document.querySelectorAll('#form-section input, #form-section textarea').forEach(el=>{
@@ -166,6 +181,8 @@
       document.getElementById('oOutDate').textContent=outDate;
       document.getElementById('oInDate').textContent=inDate;
       document.getElementById('otpValue').textContent=otp;
+      document.getElementById('rHandledOn').textContent=handledOn;
+      document.getElementById('rHandledBy').textContent=handledBy;
     }
 
     window.addEventListener('load',()=>{
@@ -183,13 +200,11 @@
         document.getElementById('parentEmail').value=p.parentEmail;
         document.getElementById('parentPhone').value=p.parentPhone;
 
-        // Make fields readonly
         document.querySelectorAll('#form-section input, #form-section textarea').forEach(el=>{
           el.setAttribute('readonly','true');
         });
         document.getElementById('sendBtn').style.display='none';
 
-        // Show results
         document.getElementById('result-section').style.display='flex';
         document.getElementById('rOutDate').textContent=p.outDate;
         document.getElementById('rOutTime').textContent=p.outTime;
@@ -199,6 +214,8 @@
         document.getElementById('oOutDate').textContent=p.outDate;
         document.getElementById('oInDate').textContent=p.inDate;
         document.getElementById('otpValue').textContent=p.otp;
+        document.getElementById('rHandledOn').textContent=p.handledOn||'';
+        document.getElementById('rHandledBy').textContent=p.handledBy||'';
         document.getElementById('user-email').textContent=p.email||'su0456@srmist.edu.in';
       }
     });
